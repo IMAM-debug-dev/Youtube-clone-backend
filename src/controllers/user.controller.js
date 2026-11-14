@@ -275,7 +275,7 @@ export const getCurrentUser = asyncHandler(async(req, res) => {
 
 
 
-const updateAccountDetails = asyncHandler(async(req, res) => {
+export const updateAccountDetails = asyncHandler(async(req, res) => {
     const {fullName, email} = req.body
 
     if (!fullName || !email) {
@@ -298,3 +298,65 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
     .status(200)
     .json(new Apirespons(200, user, "Account details updated successfully"))
 });
+
+
+
+export const updateUserAvatar = asyncHandler(async (req, res) => {
+    const avatarLocalpath = req.file?.path;
+
+    if (!avatarLocalpath) {
+        throw new ApiError(400, "Avatar file is missing");
+    }
+
+    const avatar = await uploadImage(avatarLocalpath);
+
+    if (!avatar?.url) {
+        throw new ApiError(400, "Avatar is not uploaded");
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                avatar: avatar.url
+            }
+        },
+        { new: true }
+    ).select("-password");
+
+    return res.status(200).json(
+        new Apirespons(200, user, "Avatar updated successfully")
+    );
+});
+
+
+
+export const updateUsercoverImage = asyncHandler(async (req, res) => {
+    const coverImageLocalpath = req.file?.path;
+
+    if (!coverImageLocalpath) {
+        throw new ApiError(400, "Cover image file is missing");
+    }
+
+    const coverImage = await uploadImage(coverImageLocalpath);
+
+    if (!coverImage?.url) {
+        throw new ApiError(400, "Cover image is not uploaded");
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                coverImage: coverImage.url
+            }
+        },
+        { new: true }
+    ).select("-password");
+
+    return res.status(200).json(
+        new Apirespons(200, user, "Cover image updated successfully")
+    );
+});
+
+
